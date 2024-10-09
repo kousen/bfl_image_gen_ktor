@@ -13,11 +13,14 @@ class BFLImageGenerationServiceTest {
     fun `test generate image`() = runBlocking {
         val request = ImageRequest(
             prompt = """
-                At the Dinosaur Races, animal jockeys
-                urge their mounts to victory
+                Sabretooth tigers playing happily in the snow
+                with baby penguins. The tigers are wearing
+                furry hats and the penguins are wearing
+                sunglasses. The background is a snowy
+                mountain landscape.
             """.trimIndent(),
             width = 1024,
-            height = 1024
+            height = 768
         )
 
         val requestId = service.generateImageId(request)

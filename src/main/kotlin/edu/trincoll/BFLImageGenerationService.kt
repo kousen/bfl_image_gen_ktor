@@ -94,7 +94,7 @@ class BFLImageGenerationService {
                     Status.Ready -> {
                         val sampleUrl = response.result?.sample ?: throw IOException("No sample available")
                         val savedFile = downloadAndSaveImage(sampleUrl)
-                        "Sample image saved to: ${savedFile.absolutePath}"
+                        "Sample image saved to: ${savedFile.path}"
                     }
 
                     Status.TaskNotFound -> "Task not found"

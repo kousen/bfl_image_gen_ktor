@@ -1,0 +1,599 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "BFL API",
+    "description": "Authorize with an API key from your user profile.",
+    "version": "0.0.1"
+  },
+  "paths": {
+    "/v1/get_result": {
+      "get": {
+        "tags": [
+          "Utility"
+        ],
+        "summary": "Get Result",
+        "description": "An endpoint for getting generation task result.",
+        "operationId": "get_result_v1_get_result_get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ResultResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/flux-pro-1.1": {
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Generate an image with FLUX 1.1 [pro].",
+        "description": "Submits an image generation task with FLUX 1.1 [pro].",
+        "operationId": "flux_pro_1_1_v1_flux_pro_1_1_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FluxPro11Inputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/flux-pro": {
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Generate an image with FLUX.1 [pro].",
+        "description": "Submits an image generation task with the FLUX.1 [pro].",
+        "operationId": "flux_pro_v1_flux_pro_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FluxProInputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/flux-dev": {
+      "post": {
+        "tags": [
+          "Tasks"
+        ],
+        "summary": "Generate an image with FLUX.1 [dev].",
+        "description": "Submits an image generation task with FLUX.1 [dev].",
+        "operationId": "flux_dev_v1_flux_dev_post",
+        "security": [
+          {
+            "APIKeyHeader": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FluxDevInputs"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AsyncResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AsyncResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id"
+        ],
+        "title": "AsyncResponse"
+      },
+      "FluxDevInputs": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for image generation.",
+            "example": "ein fantastisches bild"
+          },
+          "width": {
+            "type": "integer",
+            "multipleOf": 32.0,
+            "maximum": 1440.0,
+            "minimum": 256.0,
+            "title": "Width",
+            "description": "Width of the generated image in pixels. Must be a multiple of 32.",
+            "default": 1024
+          },
+          "height": {
+            "type": "integer",
+            "multipleOf": 32.0,
+            "maximum": 1440.0,
+            "minimum": 256.0,
+            "title": "Height",
+            "description": "Height of the generated image in pixels. Must be a multiple of 32.",
+            "default": 768
+          },
+          "steps": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 50.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steps",
+            "description": "Number of steps for the image generation process.",
+            "default": 28,
+            "example": 28
+          },
+          "prompt_upsampling": {
+            "type": "boolean",
+            "title": "Prompt Upsampling",
+            "description": "Whether to perform upsampling on the prompt. If active, automatically modifies the prompt for more creative generation.",
+            "default": false
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Optional seed for reproducibility.",
+            "example": 42
+          },
+          "guidance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 5.0,
+                "minimum": 1.5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guidance",
+            "description": "Guidance scale for image generation. High guidance scales improve prompt adherence at the cost of reduced realism.",
+            "default": 3.0,
+            "example": 3.0
+          },
+          "safety_tolerance": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 6.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Safety Tolerance",
+            "description": "Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.",
+            "default": 2,
+            "example": 2
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "FluxDevInputs"
+      },
+      "FluxPro11Inputs": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for image generation.",
+            "example": "ein fantastisches bild"
+          },
+          "width": {
+            "type": "integer",
+            "multipleOf": 32.0,
+            "maximum": 1440.0,
+            "minimum": 256.0,
+            "title": "Width",
+            "description": "Width of the generated image in pixels. Must be a multiple of 32.",
+            "default": 1024
+          },
+          "height": {
+            "type": "integer",
+            "multipleOf": 32.0,
+            "maximum": 1440.0,
+            "minimum": 256.0,
+            "title": "Height",
+            "description": "Height of the generated image in pixels. Must be a multiple of 32.",
+            "default": 768
+          },
+          "prompt_upsampling": {
+            "type": "boolean",
+            "title": "Prompt Upsampling",
+            "description": "Whether to perform upsampling on the prompt. If active, automatically modifies the prompt for more creative generation.",
+            "default": false
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Optional seed for reproducibility.",
+            "example": 42
+          },
+          "safety_tolerance": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 6.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Safety Tolerance",
+            "description": "Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.",
+            "default": 2,
+            "example": 2
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "FluxPro11Inputs"
+      },
+      "FluxProInputs": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt",
+            "description": "Text prompt for image generation.",
+            "example": "ein fantastisches bild"
+          },
+          "width": {
+            "type": "integer",
+            "multipleOf": 32.0,
+            "maximum": 1440.0,
+            "minimum": 256.0,
+            "title": "Width",
+            "description": "Width of the generated image in pixels. Must be a multiple of 32.",
+            "default": 1024
+          },
+          "height": {
+            "type": "integer",
+            "multipleOf": 32.0,
+            "maximum": 1440.0,
+            "minimum": 256.0,
+            "title": "Height",
+            "description": "Height of the generated image in pixels. Must be a multiple of 32.",
+            "default": 768
+          },
+          "steps": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 50.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Steps",
+            "description": "Number of steps for the image generation process.",
+            "default": 40,
+            "example": 40
+          },
+          "prompt_upsampling": {
+            "type": "boolean",
+            "title": "Prompt Upsampling",
+            "description": "Whether to perform upsampling on the prompt. If active, automatically modifies the prompt for more creative generation.",
+            "default": false
+          },
+          "seed": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seed",
+            "description": "Optional seed for reproducibility.",
+            "example": 42
+          },
+          "guidance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 5.0,
+                "minimum": 1.5
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Guidance",
+            "description": "Guidance scale for image generation. High guidance scales improve prompt adherence at the cost of reduced realism.",
+            "default": 2.5,
+            "example": 2.5
+          },
+          "safety_tolerance": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 6.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Safety Tolerance",
+            "description": "Tolerance level for input and output moderation. Between 0 and 6, 0 being most strict, 6 being least strict.",
+            "default": 2,
+            "example": 2
+          },
+          "interval": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 4.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Interval",
+            "description": "Interval parameter for guidance control.",
+            "default": 2.0,
+            "example": 2.0
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "FluxProInputs"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ResultResponse": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Task id for retrieving result"
+          },
+          "status": {
+            "$ref": "#/components/schemas/StatusResponse"
+          },
+          "result": {
+            "anyOf": [
+              {
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Result"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "status"
+        ],
+        "title": "ResultResponse"
+      },
+      "StatusResponse": {
+        "type": "string",
+        "enum": [
+          "Task not found",
+          "Pending",
+          "Request Moderated",
+          "Content Moderated",
+          "Ready",
+          "Error"
+        ],
+        "title": "StatusResponse"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    },
+    "securitySchemes": {
+      "APIKeyHeader": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-key"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Utility",
+      "description": "These utility endpoints allow you to check the results of submitted tasks."
+    },
+    {
+      "name": "Tasks",
+      "description": "Generation task endpoints. These endpoints allow you to submit generation tasks."
+    }
+  ]
+}
