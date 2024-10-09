@@ -5,6 +5,10 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.logging.DEFAULT
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.header
@@ -21,7 +25,6 @@ import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
 import java.time.LocalDateTime
@@ -30,8 +33,8 @@ import java.time.format.DateTimeFormatter
 @Serializable
 data class ImageRequest(
     val prompt: String,
-    val width: Int,
-    val height: Int,
+    val width: Int = 1024,
+    val height: Int = 768,
 )
 
 @Serializable
@@ -45,7 +48,8 @@ data class ImageResponse(
 ) {
     @Serializable
     data class Result(
-        val sample: String
+        val sample: String, // URL to the generated image
+        val prompt: String
     )
 }
 
@@ -58,19 +62,20 @@ class BFLImageGenerationService {
     companion object {
         private val API_KEY = System.getenv("BFL_API_KEY")
         private const val BASE_URL = "https://api.bfl.ml/v1"
-        private val logger = LoggerFactory.getLogger(BFLImageGenerationService::class.java)
     }
 
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(Json {
-                ignoreUnknownKeys = true
                 prettyPrint = true
-                isLenient = true
             })
         }
         install(HttpTimeout) {
             requestTimeoutMillis = 30_000
+        }
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.NONE
         }
     }
 
@@ -94,9 +99,8 @@ class BFLImageGenerationService {
                     Status.Ready -> {
                         val sampleUrl = response.result?.sample ?: throw IOException("No sample available")
                         val savedFile = downloadAndSaveImage(sampleUrl)
-                        "Sample image saved to: ${savedFile.path}"
+                        "Image saved to: ${savedFile.path}"
                     }
-
                     Status.TaskNotFound -> "Task not found"
                     Status.Failed -> "Task failed"
                     Status.Unknown -> "Unknown status"
@@ -124,7 +128,6 @@ class BFLImageGenerationService {
 
             if (response.status.value in 200..299) {
                 outputFile.writeBytes(response.body())
-                logger.info("Image saved successfully to: ${outputFile.absolutePath}")
                 outputFile
             } else {
                 throw IOException("Failed to download the image. HTTP Status Code: ${response.status.value}")

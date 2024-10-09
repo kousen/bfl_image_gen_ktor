@@ -17,10 +17,11 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-logging:$ktorVersion")
 
     testImplementation(kotlin("test"))
 
-    implementation("org.slf4j:slf4j-simple:2.0.16")
+    implementation("ch.qos.logback:logback-classic:1.5.8")
 }
 
 tasks.test {
