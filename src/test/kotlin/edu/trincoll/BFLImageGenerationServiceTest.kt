@@ -12,12 +12,7 @@ class BFLImageGenerationServiceTest {
     fun `test generate image`() = runBlocking {
         val request = ImageRequest(
             prompt = """
-                Show the annual event called
-                the Running of the Chickens,
-                where the chickens are released
-                into the streets of the town
-                of Hartford, Connecticut,
-                and the townspeople chase them.
+                A xenomorph plays chess against a Jedi Knight.
             """.trimIndent(),
             width = 1024,
             height = 768

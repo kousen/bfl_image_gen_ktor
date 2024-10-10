@@ -17,6 +17,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
+import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -71,7 +72,7 @@ class BFLImageGenerationService {
             })
         }
         install(HttpTimeout) {
-            requestTimeoutMillis = 30_000
+            requestTimeoutMillis = 10_000
         }
         install(Logging) {
             logger = Logger.DEFAULT
@@ -126,7 +127,7 @@ class BFLImageGenerationService {
             val outputFile = File("src/main/resources", fileName)
             val response: HttpResponse = client.get(imageUrl)
 
-            if (response.status.value in 200..299) {
+            if (response.status.isSuccess()) {
                 outputFile.writeBytes(response.body())
                 outputFile
             } else {
