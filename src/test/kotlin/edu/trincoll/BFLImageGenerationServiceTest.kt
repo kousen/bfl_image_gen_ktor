@@ -12,7 +12,7 @@ class BFLImageGenerationServiceTest {
     fun `test generate image`() = runBlocking {
         val request = ImageRequest(
             prompt = """
-                A xenomorph plays chess against a Jedi Knight.
+                Feeding time for the baby triceratops herd
             """.trimIndent(),
             width = 1024,
             height = 768
