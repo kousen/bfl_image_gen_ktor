@@ -24,25 +24,33 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toJavaLocalDateTime
+import kotlinx.datetime.toLocalDateTime
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import java.io.File
 import java.io.IOException
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Serializable
-data class ImageRequest(
+data class FluxPro11Inputs(
     val prompt: String,
     val width: Int = 1024,
     val height: Int = 768,
+    @SerialName("prompt_upsampling")
+    val promptUpsampling: Boolean = false,
+    val seed: Int? = null,
+    val safetyTolerance: Int? = 2,
 )
 
 @Serializable
 data class AsyncResponse(val id: String)
 
 @Serializable
-data class ImageResponse(
+data class ResultResponse(
     val id: String,
     val status: Status,
     val result: Result? = null
@@ -56,7 +64,12 @@ data class ImageResponse(
 
 @Serializable
 enum class Status {
-    Ready, InProgress, TaskNotFound, Failed, Pending, Unknown
+    TaskNotFound,
+    Pending,
+    RequestModerated,
+    ContentModerated,
+    Ready,
+    Error
 }
 
 class BFLImageGenerationService {
@@ -65,7 +78,7 @@ class BFLImageGenerationService {
         private const val BASE_URL = "https://api.bfl.ml/v1"
     }
 
-    val client = HttpClient(CIO) {
+    private val client = HttpClient(CIO) {
         install(ContentNegotiation) {
             json(Json {
                 prettyPrint = true
@@ -80,7 +93,7 @@ class BFLImageGenerationService {
         }
     }
 
-    suspend fun generateImageId(request: ImageRequest) =
+    suspend fun generateImageId(request: FluxPro11Inputs) =
         client.post("$BASE_URL/flux-pro-1.1") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
@@ -94,7 +107,7 @@ class BFLImageGenerationService {
                 val response = client.get("$BASE_URL/get_result?id=$requestId") {
                     accept(ContentType.Application.Json)
                     header("x-key", API_KEY)
-                }.body<ImageResponse>()
+                }.body<ResultResponse>()
 
                 val result = when (response.status) {
                     Status.Ready -> {
@@ -102,10 +115,12 @@ class BFLImageGenerationService {
                         val savedFile = downloadAndSaveImage(sampleUrl)
                         "Image saved to: ${savedFile.path}"
                     }
+
                     Status.TaskNotFound -> "Task not found"
-                    Status.Failed -> "Task failed"
-                    Status.Unknown -> "Unknown status"
-                    Status.Pending, Status.InProgress -> {
+                    Status.RequestModerated -> "Request moderated"
+                    Status.ContentModerated -> "Content moderated"
+                    Status.Error -> "Error occurred"
+                    Status.Pending -> {
                         emit("Task is ${response.status}, waiting...")
                         delay(500)
                         null
@@ -120,18 +135,20 @@ class BFLImageGenerationService {
         } ?: emit("Polling timed out")
     }
 
-    suspend fun downloadAndSaveImage(imageUrl: String): File =
-        withContext(Dispatchers.IO) {
-            val timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
-            val fileName = "generated_image_$timestamp.jpg"
-            val outputFile = File("src/main/resources", fileName)
+    suspend fun downloadAndSaveImage(imageUrl: String): File = withContext(Dispatchers.IO) {
+        val timestamp = Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .toJavaLocalDateTime()
+            .format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"))
+        val fileName = "generated_image_$timestamp.jpg"
+        val outputFile = File("src/main/resources", fileName).apply {
             val response: HttpResponse = client.get(imageUrl)
-
             if (response.status.isSuccess()) {
-                outputFile.writeBytes(response.body())
-                outputFile
+                writeBytes(response.body())
             } else {
                 throw IOException("Failed to download the image. HTTP Status Code: ${response.status.value}")
             }
         }
+        outputFile
+    }
 }

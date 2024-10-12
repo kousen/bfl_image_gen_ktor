@@ -10,9 +10,11 @@ class BFLImageGenerationServiceTest {
 
     @Test
     fun `test generate image`() = runBlocking {
-        val request = ImageRequest(
+        val request = FluxPro11Inputs(
             prompt = """
-                Feeding time for the baby triceratops herd
+                A bull in a china shop
+                being very careful not
+                to break anything
             """.trimIndent(),
             width = 1024,
             height = 768
