@@ -9,15 +9,14 @@ class BFLImageGenerationServiceTest {
     private val service = BFLImageGenerationService()
 
     @Test
-    fun `test generate image`() = runBlocking {
+    fun `test generate image with prompt upsampling`() = runBlocking {
         val request = FluxPro11Inputs(
             prompt = """
-                A bull in a china shop
-                being very careful not
-                to break anything
+                A warrior cat rides a dragon into battle
             """.trimIndent(),
             width = 1024,
-            height = 768
+            height = 768,
+            promptUpsampling = true,
         )
 
         val requestId = service.generateImageId(request)
@@ -25,5 +24,17 @@ class BFLImageGenerationServiceTest {
             service.pollForResult(requestId)
                 .collect(::println)
         }
+    }
+
+    @Test
+    fun `test generate and save image`() = runBlocking {
+        service.generateAndSaveImage("""
+            An ancient tortoise
+            with a party hat
+            celebrating its 100th birthday
+        """.trimIndent())
+            .collect { status ->
+                println(status)
+            }
     }
 }

@@ -151,4 +151,20 @@ class BFLImageGenerationService {
         }
         outputFile
     }
+
+    fun generateAndSaveImage(prompt: String, width: Int = 1024, height: Int = 768) = flow {
+        try {
+            val request = FluxPro11Inputs(prompt = prompt, width = width, height = height)
+            emit("Generating image with prompt: $prompt")
+
+            val imageId = generateImageId(request)
+            emit("Image generation started. ID: $imageId")
+
+            pollForResult(imageId).collect { status ->
+                emit(status)
+            }
+        } catch (e: Exception) {
+            emit("Error occurred: ${e.message}")
+        }
+    }
 }
