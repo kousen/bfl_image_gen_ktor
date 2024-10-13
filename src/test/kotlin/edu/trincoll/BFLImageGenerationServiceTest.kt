@@ -12,7 +12,7 @@ class BFLImageGenerationServiceTest {
     fun `test generate image with prompt upsampling`() = runBlocking {
         val request = FluxPro11Inputs(
             prompt = """
-                A warrior cat rides a dragon into battle
+                A Labrador in the Black Forest
             """.trimIndent(),
             width = 1024,
             height = 768,
