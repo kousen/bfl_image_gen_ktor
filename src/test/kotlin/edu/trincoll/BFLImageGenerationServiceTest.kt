@@ -14,9 +14,28 @@ class BFLImageGenerationServiceTest {
             prompt = """
                 A Black Forest Lab.
             """.trimIndent(),
-            width = 1024,
-            height = 768,
+            width = 1280,
+            height = 720,
             promptUpsampling = true,
+        )
+
+        val requestId = service.generateImageId(request)
+        withTimeout(Duration.ofSeconds(30).toMillis()) {
+            service.pollForResult(requestId)
+                .collect(::println)
+        }
+    }
+
+    @Test
+    fun `test generate 16x9 image`() = runBlocking {
+        val request = FluxPro11Inputs(
+            prompt = """
+            A bunny dressed as a Napoleonic general
+            aboard an armored llama, leading a charge into battle,
+            as both scream "BANZAI!"
+            """.trimIndent(),
+            width = 1024,
+            height = 576,
         )
 
         val requestId = service.generateImageId(request)
