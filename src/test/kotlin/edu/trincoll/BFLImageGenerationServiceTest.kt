@@ -12,7 +12,7 @@ class BFLImageGenerationServiceTest {
     fun `test generate image with prompt upsampling`() = runBlocking {
         val request = FluxPro11Inputs(
             prompt = """
-                A Labrador in the Black Forest
+                A Black Forest Lab.
             """.trimIndent(),
             width = 1024,
             height = 768,
@@ -29,9 +29,8 @@ class BFLImageGenerationServiceTest {
     @Test
     fun `test generate and save image`() = runBlocking {
         service.generateAndSaveImage("""
-            An ancient tortoise
-            with a party hat
-            celebrating its 100th birthday
+            A warrior cat riding a dragon
+            into battle
         """.trimIndent())
             .collect { status ->
                 println(status)
